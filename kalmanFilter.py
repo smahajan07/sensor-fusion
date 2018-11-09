@@ -8,15 +8,15 @@ class kalmanFilter(helperMethods):
     # set these values from the arguments received
     # current state
     self.X = np.array([[np.float64(initPos)], [np.float64(initVel)]])
-    self.I = np.identity(2);
-    self.P = np.identity(2); 
-    self.H = np.identity(2);
+    self.I = np.identity(2)
+    self.P = np.identity(2)
+    self.H = np.identity(2)
     self.Q = np.array([[accStdDev * accStdDev, 0], [0, accStdDev * accStdDev]])
     self.R = np.array([[posStdDev * posStdDev, 0], [0, posStdDev * posStdDev]])
     self.currStateTime = currTime
-    # self.A = 
+    # self.A = defined in predict
     # self.B = defined in predict
-    # self.u = 
+    # self.u = defined in predict
     # self.z = 
 
   # main functions
@@ -30,13 +30,33 @@ class kalmanFilter(helperMethods):
     self.P = np.add(np.matmul(np.matmul(self.A, self.P), np.transpose(self.A)), self.Q)
     self.currStateTime = timeNow
 
-  def updates(self):
-    pass
+  def update(self, pos, velThisAxis, posError, velError):
+    self.z = np.array([[pos], [velThisAxis]])
+    if(not posError):
+      self.R[0, 0] = posError * posError
+    else:
+      self.R[1, 1] = velError * velError
+    y = np.subtract(self.z, self.X)
+    s = np.add(self.P, self.R)
+    try:
+      sInverse = np.linalg.inv(s)
+    except np.linalg.LinAlgError:
+      print("Matrix is not invertible")
+      pass
+    else:
+      K = np.matmul(self.P, sInverse)
+      self.X = np.add(self.X, np.matmul(K, y))
+      self.P = np.matmul(np.subtract(self.I, K), self.P)
 
   def fusion(self):
     pass
 
-  def getPredictedValues(self):
-    pass
+  def getPredictedPos(self):
+
+    return self.X[0, 0]
+
+  def getPredictedVel(self):
+
+    return self.X[1, 0]
 
 

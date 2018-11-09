@@ -36,5 +36,29 @@ class helperMethods(object):
 
     return EARTH_RADIUS * c
 
+  def getPointAhead(self, lat_from, lon_from, distMtrs, azimuth):
+    radiusFraction = distMtrs / EARTH_RADIUS
+    bearing = self.degToRad(azimuth)
+    lat1 = self.degToRad(lat_from)
+    lon1 = self.degToRad(lon_from)
 
+    lat2_part1 = np.sin(lat1) * np.cos(radiusFraction)
+    lat2_part2 = np.cos(lat1) * np.sin(radiusFraction) * np.cos(bearing)
+
+    lat2 = np.arcsin(lat2_part1 + lat2_part2)
+
+    lon2_part1 = np.sin(bearing) * np.sin(radiusFraction) * np.cos(lat1)
+    lon2_part2 = np.cos(radiusFraction) - (np.sin(lat1) * np.sin(lat2))
+
+    lon2 = lon1 + np.arctan2(lon2_part1, lon2_part2)
+    lon2 = np.mod((lon2 + 3 * np.pi), (2 * np.pi)) - np.pi
+
+    return self.degToRad(lat2), self.degToRad(lon2)
+
+
+  def mtrsToGeopoint(self, latAsMtrs, lonAsMtrs):
+    lat_tmp, lon_tmp = self.getPointAhead(0.0, 0.0, lonAsMtrs, 90.0)
+    lat_ret, lon_ret = self.getPointAhead(lat_tmp, lon_tmp, latAsMtrs, 0.0)
+
+    return lat_ret, lon_ret
 
