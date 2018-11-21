@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import json
 import numpy as np
+import matplotlib.pyplot as plt
 from kalmanFilter import kalmanFilter
 from helperMethods import helperMethods
 
@@ -43,17 +44,23 @@ with open(file_name) as data_file:
                       initialData["vel_down"] * -1.0, latLonStdDev, \
                       accUpStdDev, initialData["timestamp"])
 
-  # # run loop over new readings
-  for i in range(1,10): #len(data)
+  pointsToPlotLat = []
+  pointsToPlotLon = []
+
+  orgLat = []
+  orgLon = []
+
+  # run loop over new readings
+  for i in range(1,len(data)): #len(data)
     currData = data[i]
 
     objEast.predict(currData["abs_east_acc"] * ACTUAL_GRAVITY, currData["timestamp"])
     objNorth.predict(currData["abs_north_acc"] * ACTUAL_GRAVITY, currData["timestamp"])
     objUp.predict(currData["abs_up_acc"] * ACTUAL_GRAVITY, currData["timestamp"])
 
-    if(not currData["gps_lat"]):
+    if(currData["gps_lat"] != 0.0):
 
-      defPosErr = 0
+      defPosErr = 0.0
 
       vEast = currData["vel_east"]
       longitude = objEast.lonToMtrs(currData["gps_lon"])
@@ -65,6 +72,9 @@ with open(file_name) as data_file:
 
       vUp = currData["vel_down"] * -1.0
       objUp.update(currData["gps_alt"], vUp, currData["altitude_error"], currData["vel_error"])
+
+      orgLat.append(currData["gps_lat"])
+      orgLon.append(currData["gps_lon"])
 
     predictedLonMtrs = objEast.getPredictedPos()
     predictedLatMtrs = objNorth.getPredictedPos()
@@ -78,5 +88,20 @@ with open(file_name) as data_file:
     resultantV = np.sqrt(np.power(predictedVE, 2) + np.power(predictedVN, 2))
     deltaT = currData["timestamp"] - initialData["timestamp"]
 
-    print("{} seconds in, Lat: {}, Lon: {}, Alt: {}, Vel(mph): {}".format(
-            deltaT, predictedLat, predictedLon, predictedAlt, resultantV))
+    pointsToPlotLat.append(predictedLat)
+    pointsToPlotLon.append(predictedLon)
+
+    # print("{} seconds in, Lat: {}, Lon: {}, Alt: {}, Vel(mph): {}".format(
+    #         deltaT, predictedLat, predictedLon, predictedAlt, resultantV))
+
+# print(pointsToPlotLat[1])
+# print(pointsToPlotLon[1])
+plt.subplot(2,1,1)
+plt.title('Original')
+plt.plot(orgLat, orgLon)
+
+plt.subplot(2,1,2)
+plt.title('Fused')
+plt.plot(pointsToPlotLat, pointsToPlotLon)
+
+plt.show()
