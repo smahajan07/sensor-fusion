@@ -4,10 +4,19 @@ import numpy as np
 EARTH_RADIUS = 6371 * 1000.0 # meters
 
 class helperMethods(object):
+  '''
+  HelperMethods class has all fucntions that help in calculations
+  with handling GPS data and doing operations like conversion from
+  Radians to Degrees (and vice-versa) or computing distance between
+  GPS points.
+  '''
   def __init__(self):
     pass
 
   def latToMtrs(self, latitude):
+    '''
+    Converts Latitude to Meters
+    '''
     distance = self.getDistMtrs(latitude, 0.0, 0.0, 0.0)
     if(distance < 0):
       distance *= -1
@@ -15,6 +24,9 @@ class helperMethods(object):
     return distance
 
   def lonToMtrs(self, longitude):
+    '''
+    Converts Longitiude to Meters
+    '''
     distance = self.getDistMtrs(0.0, longitude, 0.0, 0.0)
     if(longitude < 0):
       distance *= -1
@@ -22,14 +34,23 @@ class helperMethods(object):
     return distance
 
   def degToRad(self, latOrLon):
+    '''
+    Converts Degrees to Radians
+    '''
 
     return (latOrLon * np.pi) / 180.0
 
   def radToDeg(self, latOrLon):
+    '''
+    Converts radians to degrees
+    '''
     
     return (latOrLon * 180.0) / np.pi
 
   def getDistMtrs(self, lat_from, lon_from, lat_to, lon_to):
+    '''
+    Get distance between two GPS points
+    '''
     deltaLon = self.degToRad(lon_to - lon_from)
     deltaLat = self.degToRad(lat_to - lat_from)
 
@@ -41,6 +62,9 @@ class helperMethods(object):
     return EARTH_RADIUS * c
 
   def getPointAhead(self, lat_from, lon_from, distMtrs, azimuth):
+    '''
+    Helper function for mtrsToGeopoint
+    '''
     radiusFraction = distMtrs / EARTH_RADIUS
     bearing = self.degToRad(azimuth)
     lat1 = self.degToRad(lat_from)
@@ -61,6 +85,9 @@ class helperMethods(object):
 
 
   def mtrsToGeopoint(self, latAsMtrs, lonAsMtrs):
+    '''
+    Conversion between GPS points to meters
+    '''
     lat_tmp, lon_tmp = self.getPointAhead(0.0, 0.0, lonAsMtrs, 90.0)
     lat_ret, lon_ret = self.getPointAhead(lat_tmp, lon_tmp, latAsMtrs, 0.0)
 
