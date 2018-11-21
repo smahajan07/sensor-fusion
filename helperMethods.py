@@ -22,6 +22,10 @@ class helperMethods(object):
     return distance
 
   def degToRad(self, latOrLon):
+
+    return (latOrLon * np.pi) / 180.0
+
+  def radToDeg(self, latOrLon):
     
     return (latOrLon * 180.0) / np.pi
 
@@ -53,7 +57,7 @@ class helperMethods(object):
     lon2 = lon1 + np.arctan2(lon2_part1, lon2_part2)
     lon2 = np.mod((lon2 + 3 * np.pi), (2 * np.pi)) - np.pi
 
-    return self.degToRad(lat2), self.degToRad(lon2)
+    return self.radToDeg(lat2), self.radToDeg(lon2)
 
 
   def mtrsToGeopoint(self, latAsMtrs, lonAsMtrs):
